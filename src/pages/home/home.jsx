@@ -6,13 +6,13 @@ import pin from "../../assets/img/black pin.png";
 import { MdOutlineMyLocation } from "react-icons/md";
 
 export const Home = memo(() => {
-  const [clickedCoordinates, setClickedCoordinates] = useState(null);
+  const currentCoords = JSON.parse(localStorage.getItem("coords"));
+  const center = currentCoords || [41.002534933524345, 71.67760873138532];
+  const [clickedCoordinates, setClickedCoordinates] = useState(
+    currentCoords || ""
+  );
 
-  const center = clickedCoordinates?.length
-    ? [...clickedCoordinates]
-    : [41.002534933524345, 71.67760873138532];
-
-  const handleMapClick = (e) => {
+  const handleMapClick = async (e) => {
     const coordinates = e.get("coords");
     setClickedCoordinates(coordinates);
   };
@@ -20,17 +20,16 @@ export const Home = memo(() => {
   const getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition((position) => {
       const { latitude, longitude } = position.coords;
-      setClickedCoordinates([latitude, longitude]);
-
-      window.navigator.vibrate(200);
+      localStorage.setItem("coords", JSON.stringify([latitude, longitude]));
     });
+    window.location.reload();
   };
 
   return (
     <YMaps>
-      <div className="map_box">
-        {/* My awesome application with maps!{" "}
-        <span>{clickedCoordinates?.join(", ")}</span> */}
+      <div className="map_box"> 
+        My awesome application with maps!{" "}
+        <span>{clickedCoordinates && clickedCoordinates?.join(", ")}</span>
         <Map
           defaultState={{
             center: center,
@@ -45,16 +44,14 @@ export const Home = memo(() => {
           onClick={handleMapClick}
           className="map_item"
         >
-          {clickedCoordinates && (
-            <Placemark
-              geometry={[...clickedCoordinates]}
-              options={{
-                iconLayout: "default#image",
-                iconImageSize: [40, 40],
-                iconImageHref: pin,
-              }}
-            />
-          )}
+          <Placemark
+            geometry={[...clickedCoordinates]}
+            options={{
+              iconLayout: "default#image",
+              iconImageSize: [40, 40],
+              iconImageHref: pin,
+            }}
+          />
 
           <Polyline
             geometry={[
@@ -75,7 +72,7 @@ export const Home = memo(() => {
             ]}
             options={{
               balloonCloseButton: false,
-              strokeColor: "#000",
+              strokeColor: "#ff0000",
               strokeWidth: 4,
               strokeOpacity: 0.5,
             }}
