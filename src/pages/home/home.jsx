@@ -1,87 +1,26 @@
-import React, { useState, memo } from "react";
+import React, { useState } from "react";
 import "./home.css";
-import { YMaps, Map, Placemark, Polyline } from "@pbe/react-yandex-maps";
+import { io } from "socket.io-client";
 
-import pin from "../../assets/img/black pin.png";
-import { MdOutlineMyLocation } from "react-icons/md";
+const socket = io("http://localhost:80");
 
-export const Home = memo(() => {
-  const currentCoords = JSON.parse(localStorage.getItem("coords"));
-  const center = currentCoords || [41.002534933524345, 71.67760873138532];
-  const [clickedCoordinates, setClickedCoordinates] = useState(
-    currentCoords || ""
-  );
+export const Home = () => {
+  const [orders, setOrders] = useState([]);
+  const id = "bd81c3";
+  const department = "fast food";
 
-  const handleMapClick = async (e) => {
-    const coordinates = e.get("coords");
-    setClickedCoordinates(coordinates);
-  };
+  socket.on(`/get/order/${id}/${department}`, (data) => {
+    setOrders(data);
+  });
 
-  const getCurrentLocation = () => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const { latitude, longitude } = position.coords;
-      localStorage.setItem("coords", JSON.stringify([latitude, longitude]));
-    });
-    window.location.reload();
-  };
+  // const currentOrder = orders && orders?.filter((item) => item?.status === 0);
+  // const newOrders = currentOrder?.sort((a, b) => {
+  //   const dateA = new Date(a.receivedAt);
+  //   const dateB = new Date(b.receivedAt);
+  //   return dateB - dateA;
+  // });
 
-  return (
-    <YMaps>
-      <div className="map_box"> 
-        My awesome application with maps!{" "}
-        <span>{clickedCoordinates && clickedCoordinates?.join(", ")}</span>
-        <Map
-          defaultState={{
-            center: center,
-            zoom: 17,
-            controls: [],
-          }}
-          instanceRef={(ref) => {
-            if (ref) {
-              ref?.behaviors?.disable(["scrollZoom"]);
-            }
-          }}
-          onClick={handleMapClick}
-          className="map_item"
-        >
-          <Placemark
-            geometry={[...clickedCoordinates]}
-            options={{
-              iconLayout: "default#image",
-              iconImageSize: [40, 40],
-              iconImageHref: pin,
-            }}
-          />
-
-          <Polyline
-            geometry={[
-              [40.96299228337921, 71.68732205954962],
-              [40.96481401312289, 71.63891355124882],
-              [40.98615050219515, 71.59908811179571],
-              [41.00383890153776, 71.58363858786991],
-              [41.01502174453666, 71.60698453513555],
-              [41.02360262929261, 71.62140409079963],
-              [41.026722671736955, 71.64818326560429],
-              [41.03036253299224, 71.67667905417852],
-              [41.015541830223775, 71.68869535056524],
-              [41.006439733364445, 71.69933835593633],
-              [40.99447505056397, 71.70483151999882],
-              [40.97782489477923, 71.71204129783082],
-              [40.96160154909337, 71.6880053606493],
-              [40.96299228337921, 71.68732205954962],
-            ]}
-            options={{
-              balloonCloseButton: false,
-              strokeColor: "#ff0000",
-              strokeWidth: 4,
-              strokeOpacity: 0.5,
-            }}
-          />
-        </Map>
-        <button onClick={getCurrentLocation}>
-          <MdOutlineMyLocation />
-        </button>
-      </div>
-    </YMaps>
-  );
-});
+  return <div className="new_orders__container">
+    
+  </div>;
+};
